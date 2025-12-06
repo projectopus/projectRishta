@@ -1,5 +1,440 @@
-<html>
-  <body style="background-color: black; color: white;">
-    rishta cottage
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Community Hub</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+    <style>
+        :root {
+            --bg-dark: #121214;
+            --bg-panel: #1b1b1f;
+            --proton-purple: #6d4aff;
+            --proton-accent: #c6bbf8;
+            --text-main: #ffffff;
+            --text-muted: #8b8b95;
+            --font-main: 'Space Grotesk', sans-serif; /* The Deezer Vibe */
+        }
+
+        /* --- Global Reset & Mobile Fixes --- */
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; /* Removes blue click box */
+            outline: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        .header-action {
+            padding: 24px 24px 10px 24px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-top: safe-area-inset-top;
+            z-index: 10;
+        }
+
+        .action-label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--proton-accent);
+            letter-spacing: -0.02em;
+        }
+
+        .action-btn {
+            background: var(--proton-purple);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(109, 74, 255, 0.4);
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        .action-btn:active { transform: scale(0.92); }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            overflow-y: scroll; /* Smooth scroll */
+            padding: 0 20px 140px 20px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        main::-webkit-scrollbar { display: none; }
+
+        .page { display: none; animation: fadeUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .page.active { display: block; }
+
+        h1 { font-size: 2.8rem; margin-bottom: 1.5rem; letter-spacing: -0.04em; font-weight: 700; }
+        
+        /* --- Card Styles --- */
+        .card-list { display: flex; flex-direction: column; gap: 16px; }
+        
+        .card {
+            background: var(--bg-panel);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card h3 { font-size: 1.2rem; margin-bottom: 6px; letter-spacing: -0.02em; }
+        .card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+        
+        /* Embed Mock Styles */
+        .embed-preview {
+            margin-top: 12px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 0.85rem;
+        }
+        
+        .platform-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        /* --- Modal Popup --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .modal-overlay.open { display: flex; opacity: 1; }
+
+        .modal-box {
+            background: var(--bg-panel);
+            width: 90%;
+            max-width: 400px;
+            padding: 25px;
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transform: scale(0.9);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.open .modal-box { transform: scale(1); }
+
+        .modal-box h2 { margin-bottom: 20px; font-size: 1.5rem; }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; font-weight: 700; }
+        .input-group input {
+            width: 100%;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        .input-group input:focus { border-color: var(--proton-purple); }
+
+        .modal-actions { display: flex; gap: 10px; margin-top: 25px; }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-confirm { background: var(--proton-purple); color: white; }
+
+        /* --- Nav Dock --- */
+        .nav-dock {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(27, 27, 31, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 50px;
+            padding: 6px 10px;
+            display: flex;
+            gap: 4px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .nav-item {
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 65px;
+            height: 60px;
+            cursor: pointer;
+            color: var(--text-muted);
+            position: relative;
+        }
+
+        .nav-item span {
+            font-size: 0.65rem;
+            margin-top: 5px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .icon-box {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px solid transparent;
+        }
+
+        .nav-item.active .icon-box {
+            border-color: var(--proton-purple);
+            color: white;
+            background: rgba(109, 74, 255, 0.1);
+        }
+        .nav-item.active { color: white; }
+
+        /* About Grid */
+        .bubble-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 20px; }
+        .bubble { width: 100px; height: 100px; object-fit: cover; border-radius: 30%; filter: grayscale(0.3); transition: 0.3s; }
+        .bubble:nth-child(even) { width: 130px; border-radius: 50%; }
+
+        /* Keyframes */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header class="header-action" id="headerAction">
+        <span class="action-label" id="actionLabel">link new post</span>
+        <button class="action-btn" onclick="handleMainAction()"><i data-lucide="plus"></i></button>
+    </header>
+
+    <main>
+        <section id="posts" class="page active">
+            <h1>Feed</h1>
+            <div class="card-list" id="feedList">
+                <div class="card">
+                    <span class="platform-tag" style="background:rgba(29, 161, 242, 0.2); color:#1DA1F2">Twitter</span>
+                    <h3>Official Update</h3>
+                    <p>Check out the latest release notes on our timeline.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="topics" class="page">
+            <h1>Topics</h1>
+            <div class="card-list">
+                <div class="card"><h3>General</h3><p>Anything goes here.</p></div>
+                <div class="card"><h3>Music</h3><p>What are you listening to?</p></div>
+            </div>
+        </section>
+
+        <section id="about" class="page">
+            <h1>Vibe</h1>
+            <p>A digital playground for the future.</p>
+            <div class="bubble-grid">
+                <img src="https://picsum.photos/200?random=1" class="bubble">
+                <img src="https://picsum.photos/200?random=2" class="bubble">
+                <img src="https://picsum.photos/200?random=3" class="bubble">
+            </div>
+        </section>
+
+        <section id="members" class="page">
+            <h1>Squad</h1>
+            <div class="card-list">
+                <div class="card"><h3>You</h3><p>Online</p></div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="postModal">
+        <div class="modal-box">
+            <h2>New Post</h2>
+            <div class="input-group">
+                <label>Post Title</label>
+                <input type="text" id="postTitle" placeholder="What's this about?">
+            </div>
+            <div class="input-group">
+                <label>Link (FB, Insta, X)</label>
+                <input type="text" id="postLink" placeholder="https://...">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-confirm" onclick="submitPost()">Post</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-dock">
+        <button class="nav-item active" onclick="switchTab('posts')">
+            <div class="icon-box"><i data-lucide="layers"></i></div>
+            <span>Posts</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('topics')">
+            <div class="icon-box"><i data-lucide="message-circle"></i></div>
+            <span>Topics</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('about')">
+            <div class="icon-box"><i data-lucide="sparkles"></i></div>
+            <span>About</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('members')">
+            <div class="icon-box"><i data-lucide="users"></i></div>
+            <span>Members</span>
+        </button>
+    </nav>
+
+    <script>
+        lucide.createIcons();
+        let currentTab = 'posts';
+
+        // --- Tabs Logic ---
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            const label = document.getElementById('actionLabel');
+            const header = document.getElementById('headerAction');
+            
+            if (tabId === 'posts') {
+                header.style.display = 'flex';
+                label.innerText = 'link new post';
+            } else if (tabId === 'topics') {
+                header.style.display = 'flex';
+                label.innerText = 'add topic';
+            } else if (tabId === 'members') {
+                header.style.display = 'flex';
+                label.innerText = 'join the community';
+            } else {
+                header.style.display = 'none';
+            }
+        }
+
+        // --- Modal Logic ---
+        function handleMainAction() {
+            if (currentTab === 'posts') {
+                document.getElementById('postModal').classList.add('open');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('postModal').classList.remove('open');
+            // Clear inputs
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postLink').value = '';
+        }
+
+        // --- Embed / Post Logic ---
+        function submitPost() {
+            const title = document.getElementById('postTitle').value;
+            const link = document.getElementById('postLink').value;
+            
+            if (!title) return;
+
+            const feed = document.getElementById('feedList');
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            // Determine Platform
+            let platformHtml = '';
+            let contentHtml = '';
+
+            if (link.includes('twitter.com') || link.includes('x.com')) {
+                // Real Twitter Embed
+                platformHtml = `<span class="platform-tag" style="background:rgba(0,0,0,0.5); border:1px solid #333; color:#fff">X / Twitter</span>`;
+                // Try to use OEmbed via blockquote
+                contentHtml = `<blockquote class="twitter-tweet" data-theme="dark"><a href="${link}"></a></blockquote>`;
+            } 
+            else if (link.includes('facebook.com')) {
+                platformHtml = `<span class="platform-tag" style="background:#1877F2; color:#fff">Facebook</span>`;
+                contentHtml = `<div style="background:#242526; padding:15px; border-radius:8px; margin-top:10px; font-size:0.8rem; color:#b0b3b8;">
+                                <p><strong>Preview Unavailable</strong></p>
+                                <p>Facebook prevents direct embedding without API keys.</p>
+                                <a href="${link}" target="_blank" style="color:#2D88FF; display:block; margin-top:5px;">View on Facebook &rarr;</a>
+                               </div>`;
+            }
+            else if (link.includes('instagram.com')) {
+                platformHtml = `<span class="platform-tag" style="background:linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888, #8a3ab9); color:#fff">Instagram</span>`;
+                contentHtml = `<div style="background:#000; padding:15px; border-radius:8px; margin-top:10px; border:1px solid #333;">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                                    <div style="width:30px; height:30px; background:#333; border-radius:50%;"></div>
+                                    <div style="width:100px; height:10px; background:#333; border-radius:5px;"></div>
+                                </div>
+                                <div style="width:100%; aspect-ratio:1/1; background:#1a1a1a; display:flex; align-items:center; justify-content:center; color:#555;">
+                                    Image Preview
+                                </div>
+                                <a href="${link}" target="_blank" style="color:#fff; font-size:0.8rem; display:block; margin-top:10px; text-decoration:none;">View on Instagram &rarr;</a>
+                               </div>`;
+            } 
+            else {
+                // Generic Link
+                platformHtml = `<span class="platform-tag" style="background:#333; color:#aaa">Link</span>`;
+                contentHtml = `<a href="${link}" target="_blank" style="color:var(--proton-purple); word-break:break-all; font-size:0.8rem;">${link}</a>`;
+            }
+
+            card.innerHTML = `
+                ${platformHtml}
+                <h3>${title}</h3>
+                ${contentHtml}
+            `;
+
+            feed.prepend(card); // Add to top
+            
+            // Reload Twitter widgets if needed
+            if (window.twttr) {
+                twttr.widgets.load();
+            }
+            
+            closeModal();
+        }
+    </script>
+</body>
 </html>
